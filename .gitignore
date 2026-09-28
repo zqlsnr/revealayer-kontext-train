@@ -1,0 +1,43 @@
+# ---- downloaded data & weights (never commit) ----
+data/
+models/
+ckpts/
+results_single/
+validate_out/
+
+# ---- training artifacts ----
+# keep the reported training curve: output/stage2_full/loss_log.csv is tracked
+output/*
+!output/stage2_full/
+output/stage2_full/*
+!output/stage2_full/loss_log.csv
+logs/
+wandb/
+*.log
+
+# ---- checkpoints / weights ----
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+
+# ---- python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+
+# ---- editors / OS ----
+.DS_Store
+.idea/
+.vscode/
+
+# ---- keep README assets and benchmark metadata ----
+!assets/**
+!assets/*.png
+
+# ---- never commit push credentials ----
+.push_key*

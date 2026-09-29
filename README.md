@@ -457,6 +457,21 @@ contains the per-sample output of `validate.py`:
 └── pred_*.png     predicted RGBA layers, front to back
 ```
 
+Every panel below is one of those samples: **left half = ground-truth background, right half = prediction**,
+which is exactly the pair the background PSNR/SSIM is computed on.
+
+| sample | PSNR / SSIM | ground-truth background ｜ predicted background |
+|---|---|---|
+| `5_7390` | 27.85 dB / 0.97 | <img src="assets/validation/checkpoint-28000/5_7390/cmp_bg.png" width="520"> |
+| `17768652` | 25.94 dB / 0.97 | <img src="assets/validation/checkpoint-28000/17768652/cmp_bg.png" width="520"> |
+| `4_4561` | 25.39 dB / 0.95 | <img src="assets/validation/checkpoint-28000/4_4561/cmp_bg.png" width="520"> |
+| `2_13967516` | 19.33 dB / 0.86 | <img src="assets/validation/checkpoint-28000/2_13967516/cmp_bg.png" width="520"> |
+| `2_04131034` | 21.05 dB / 0.44 | <img src="assets/validation/checkpoint-28000/2_04131034/cmp_bg.png" width="520"> |
+
+The last row is the failure case discussed below. Each sample folder also holds `cmp_fg*.png`
+(per-layer composites), `merged.png` (prediction recomposed) and the predicted `pred_*.png` RGBA layers —
+e.g. [`5_7390/merged.png`](assets/validation/checkpoint-28000/5_7390/merged.png).
+
 The 442-image full run stays out of the repository (296 MB); the numbers above were recomputed from the
 saved comparison panels with the SSIM implementation in `validate.py`, which is range-aware and rejects
 values outside `[-1, 1]`. An earlier summary of the same run was written by a metric that was not

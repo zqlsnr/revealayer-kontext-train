@@ -62,25 +62,66 @@ def psnr_rgb(a: np.ndarray, b: np.ndarray) -> float:
     return 10.0 * math.log10((max_val ** 2) / mse)
 
 
+def _data_range(a: np.ndarray, b: np.ndarray) -> float:
+    """按实际数值范围选 data_range: uint8 [0,255] → 255, float [0,1] → 1.0。
+
+    必须由数据决定, 不能写死 255: SSIM 的 C1/C2 随 data_range 平方变化,
+    对 [0,1] 的 float 图用 255 会让 C1/C2 远大于图像方差, 结果被"压"到 ≈1,
+    阈值判定就失去意义。
+    """
+    peak = float(max(np.max(a), np.max(b)))
+    return 1.0 if peak <= 1.5 else 255.0
+
+
+#: 记录一次运行里实际生效的 SSIM 实现, 写进 validate_summary.json 便于回溯。
+_SSIM_STATE: dict = {"impl": "none"}
+
+
+def _ssim_with_skimage(a: np.ndarray, b: np.ndarray, data_range: float) -> float:
+    from skimage.metrics import structural_similarity as sk_ssim
+    return float(sk_ssim(a, b, channel_axis=2, data_range=data_range))
+
+
+def _ssim_with_opencv(a: np.ndarray, b: np.ndarray, data_range: float) -> float:
+    """无 skimage 时的单尺度 SSIM 兜底 (11x11 高斯窗), C1/C2 按 data_range 定标。"""
+    a_g = cv2.cvtColor(a, cv2.COLOR_RGB2GRAY).astype(np.float64)
+    b_g = cv2.cvtColor(b, cv2.COLOR_RGB2GRAY).astype(np.float64)
+    c1, c2 = (0.01 * data_range) ** 2, (0.03 * data_range) ** 2
+    mu_a = cv2.GaussianBlur(a_g, (11, 11), 1.5)
+    mu_b = cv2.GaussianBlur(b_g, (11, 11), 1.5)
+    mu_a2, mu_b2, mu_ab = mu_a ** 2, mu_b ** 2, mu_a * mu_b
+    sig_a2 = cv2.GaussianBlur(a_g ** 2, (11, 11), 1.5) - mu_a2
+    sig_b2 = cv2.GaussianBlur(b_g ** 2, (11, 11), 1.5) - mu_b2
+    sig_ab = cv2.GaussianBlur(a_g * b_g, (11, 11), 1.5) - mu_ab
+    num = (2 * mu_ab + c1) * (2 * sig_ab + c2)
+    den = (mu_a2 + mu_b2 + c1) * (sig_a2 + sig_b2 + c2)
+    return float(np.mean(num / den))
+
+
 def ssim_rgb(a: np.ndarray, b: np.ndarray) -> float:
-    """简化 SSIM (单尺度, 11x11 高斯窗)。a,b: [H,W,3] uint8。返回 [0,1]。"""
-    try:
-        from skimage.metrics import structural_similarity as sk_ssim
-        return float(sk_ssim(a, b, channel_axis=2, data_range=255))
-    except Exception:
-        # fallback: 用 OpenCV
-        a_g = cv2.cvtColor(a, cv2.COLOR_RGB2GRAY)
-        b_g = cv2.cvtColor(b, cv2.COLOR_RGB2GRAY)
-        c1, c2 = (0.01 * 255) ** 2, (0.03 * 255) ** 2
-        mu_a = cv2.GaussianBlur(a_g, (11, 11), 1.5)
-        mu_b = cv2.GaussianBlur(b_g, (11, 11), 1.5)
-        mu_a2, mu_b2, mu_ab = mu_a ** 2, mu_b ** 2, mu_a * mu_b
-        sig_a2 = cv2.GaussianBlur(a_g ** 2, (11, 11), 1.5) - mu_a2
-        sig_b2 = cv2.GaussianBlur(b_g ** 2, (11, 11), 1.5) - mu_b2
-        sig_ab = cv2.GaussianBlur(a_g * b_g, (11, 11), 1.5) - mu_ab
-        num = (2 * mu_ab + c1) * (2 * sig_ab + c2)
-        den = (mu_a2 + mu_b2 + c1) * (sig_a2 + sig_b2 + c2)
-        return float(np.mean(num / den))
+    """单尺度 SSIM, 支持 uint8 [0,255] 与 float [0,1] 两种输入。
+
+    优先用 scikit-image, 否则用 OpenCV 兜底; 两条路径都按数据实际范围定标。
+    返回值必然落在 [-1,1]: 越界说明指标实现有问题, 直接抛错, 避免把一个不可能
+    通过阈值的数字静默写进报告。
+    """
+    data_range = _data_range(a, b)
+    value, error = None, None
+    for name, fn in (("skimage", _ssim_with_skimage), ("opencv", _ssim_with_opencv)):
+        try:
+            value = fn(a, b, data_range)
+            _SSIM_STATE["impl"] = name
+            break
+        except Exception as exc:  # 缺少 scikit-image / cvtColor 不支持该 dtype
+            error = exc
+    if value is None:
+        raise RuntimeError(f"SSIM 计算失败 (data_range={data_range}): {error}")
+    if not (-1.0 - 1e-6) <= value <= 1.0 + 1e-6:
+        raise ValueError(
+            f"SSIM 越界: {value:.4f} (impl={_SSIM_STATE['impl']}, data_range={data_range}); "
+            "请检查输入 dtype/数值范围与指标实现"
+        )
+    return float(min(1.0, max(-1.0, value)))
 
 
 def composite_rgba_on_bg(rgba: np.ndarray, bg: np.ndarray) -> np.ndarray:
@@ -351,6 +392,8 @@ def main():
         "bg_ssim_mean": agg("bg_ssim"),
         "fg_psnr_mean": agg("fg_psnr_mean"),
         "fg_ssim_mean": agg("fg_ssim_mean"),
+        # 指标口径留痕: 便于日后核对数字是用哪条实现、哪个 data_range 算出来的
+        "ssim_impl": _SSIM_STATE["impl"],
     }
 
     # 判定
@@ -372,7 +415,7 @@ def main():
     print("=" * 60)
     print(f"  样本数        : {summary['n_samples']}")
     print(f"  背景 PSNR     : {summary['bg_psnr_mean']:.4f} dB  (阈值 {args.bg_psnr_threshold})")
-    print(f"  背景 SSIM     : {summary['bg_ssim_mean']:.4f}     (阈值 {args.bg_ssim_threshold})")
+    print(f"  背景 SSIM     : {summary['bg_ssim_mean']:.4f}     (阈值 {args.bg_ssim_threshold}, 实现 {summary['ssim_impl']})")
     print(f"  前景 PSNR     : {summary['fg_psnr_mean']:.4f} dB" if summary['fg_psnr_mean'] else "  前景 PSNR     : N/A")
     print(f"  前景 SSIM     : {summary['fg_ssim_mean']:.4f}" if summary['fg_ssim_mean'] else "  前景 SSIM     : N/A")
     print(f"  判定          : {'PASS ✅' if passed else 'FAIL ❌  (建议排查后再跑全量)'}")

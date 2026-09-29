@@ -15,3 +15,5 @@ protobuf==3.20.2
 sentencepiece==0.1.99
 peft==0.15.2
 xformers==0.0.31.post1
+# validate.py 的 SSIM 指标; 缺它时会退回 OpenCV 兜底实现
+scikit-image==0.25.2

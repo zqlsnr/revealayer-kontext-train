@@ -1,0 +1,88 @@
+name: repo-integrity
+
+# Guards against two failure modes that are easy to hit in this repository and
+# expensive to notice late:
+#   1. an unanchored .gitignore rule silently swallowing source trees
+#      (e.g. "models/" also matches diffusers/src/diffusers/models/),
+#   2. downloaded weights or raw validation results ending up in the repository.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required source files are tracked
+        run: |
+          set -euo pipefail
+          required=(
+            infer.py train.py validate.py infer_single.py dataset.py train.sh validate.sh train_full.sh
+            models/adapter.py models/lora_utils.py
+            models/custom_model_mmdit.py models/custom_model_xvae.py models/custom_pipeline.py
+            diffusers/src/diffusers/models/__init__.py
+            diffusers/src/diffusers/models/transformers/transformer_flux.py
+            diffusers/src/diffusers/models/autoencoders/autoencoder_kl.py
+            diffusers/src/diffusers/loaders/peft.py
+            configs/base.py configs/kontext_train_1024.py
+            benchmark/RevealLayerBench.json benchmark/validate_checkpoint-28000.json
+            assets/framework.png assets/demo1.png
+            README.md TRAINING.md LICENSE requirements.txt
+          )
+          missing=0
+          for f in "${required[@]}"; do
+            if [ ! -f "$f" ]; then echo "::error file=$f::required file is missing from the repository"; missing=1; fi
+          done
+          exit "$missing"
+
+      - name: No weights or raw results are committed
+        run: |
+          set -euo pipefail
+          weights=$(git ls-files | grep -E '\.(safetensors|pt|pth|ckpt)$' || true)
+          if [ -n "$weights" ]; then
+            echo "::error::model weights must never be committed:"; echo "$weights"; exit 1
+          fi
+          raw=$(git ls-files | grep -E '^(validate_out|data|ckpts|results_single)/|^models/(FLUX|RevealLayer)' || true)
+          if [ -n "$raw" ]; then
+            echo "::error::downloaded data or raw results must never be committed:"; echo "$raw"; exit 1
+          fi
+
+      - name: .gitignore content rules stay anchored to the repository root
+        run: |
+          set -euo pipefail
+          # "/data/" is anchored, "data/" is not: an unanchored rule matches that
+          # directory name at any depth and can hide real source (see the header
+          # of .gitignore). Keep this repository free of unanchored content rules.
+          if grep -nE '^(models|data|logs|output|ckpts|validate_out|results_single)/' .gitignore; then
+            echo "::error::.gitignore contains an unanchored content rule; prefix it with '/'"
+            exit 1
+          fi
+          echo ".gitignore content rules are anchored"
+
+      - name: Sample gallery is present
+        run: |
+          set -euo pipefail
+          find assets/validation -name 'cmp_bg.png' | sort
+          n=$(find assets/validation -name 'cmp_bg.png' | wc -l)
+          if [ "$n" -lt 1 ]; then echo "::error::validation gallery is empty"; exit 1; fi
+          echo "$n sample folder(s) checked in"
+
+      - name: Python sources parse
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import ast, pathlib
+          bad = []
+          for f in list(pathlib.Path('.').glob('*.py')) + list(pathlib.Path('models').glob('*.py')) + list(pathlib.Path('configs').glob('*.py')):
+              try:
+                  ast.parse(f.read_text(encoding='utf-8'))
+              except SyntaxError as exc:
+                  bad.append(f"{f}: {exc}")
+          if bad:
+              raise SystemExit("::error::syntax errors:\n" + "\n".join(bad))
+          print("top-level, models/ and configs/ sources parse")
+          PY

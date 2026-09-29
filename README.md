@@ -462,6 +462,11 @@ saved comparison panels with the SSIM implementation in `validate.py`, which is 
 values outside `[-1, 1]`. An earlier summary of the same run was written by a metric that was not
 range-aware and reported `bg_ssim_mean = 2.2434`, which must not be quoted.
 
+The gallery is a random draw, so it deliberately keeps one clear failure next to the typical results:
+`2_04131034` reconstructs the background poorly (PSNR 21.05 dB, SSIM 0.44, among the three worst of the
+50), while the other four sit at SSIM 0.86–0.97. The mean passes the gate — the tail is exactly what the
+per-sample visualisations exist for.
+
 ---
 
 ## ⚡ Inference

@@ -432,6 +432,36 @@ python validate.py \
 
 Outputs: `VALIDATE_RESULT`, `validate_summary.json` and side-by-side images in `--output_dir`.
 
+### Validation output example (`checkpoint-28000`)
+
+A validation run of the stage-2 `checkpoint-28000` on 50 samples of `data/subset_1000/val_100.json` is
+summarised in [`benchmark/validate_checkpoint-28000.json`](benchmark/validate_checkpoint-28000.json):
+
+| metric (background) | value | threshold |
+|---|---:|---:|
+| PSNR mean | 22.55 dB | ≥ 20 |
+| SSIM mean | 0.83 | ≥ 0.7 |
+| SSIM min / median / max | 0.14 / 0.91 / 0.99 | — |
+| verdict | **PASS** | |
+
+Five randomly chosen samples of that run are checked in under
+[`assets/validation/checkpoint-28000/`](assets/validation/checkpoint-28000) (chosen with
+`random.seed(20260929)` over the sorted `<imgid>` directories, so the pick is reproducible). Each folder
+contains the per-sample output of `validate.py`:
+
+```text
+<imgid>/
+├── cmp_bg.png     ground-truth background | predicted background, side by side
+├── cmp_fg*.png    per-layer composites (ground truth | prediction)
+├── merged.png     predicted layers composited back together
+└── pred_*.png     predicted RGBA layers, front to back
+```
+
+The 442-image full run stays out of the repository (296 MB); the numbers above were recomputed from the
+saved comparison panels with the SSIM implementation in `validate.py`, which is range-aware and rejects
+values outside `[-1, 1]`. An earlier summary of the same run was written by a metric that was not
+range-aware and reported `bg_ssim_mean = 2.2434`, which must not be quoted.
+
 ---
 
 ## ⚡ Inference

@@ -1,0 +1,268 @@
+{
+  "checkpoint": "output/stage2_full/checkpoint-28000",
+  "task": "layer-decompose",
+  "n_samples": 50,
+  "metrics_source": "recomputed from the saved cmp_bg.png panels (left: GT background, right: prediction) using the corrected SSIM in validate.py (7x7 box window, data_range=255, channel mean). The raw validate_summary.json of that run reported bg_ssim_mean=2.2434, which is outside the mathematically possible [-1,1] and must not be quoted.",
+  "thresholds": {
+    "bg_psnr": 20.0,
+    "bg_ssim": 0.7
+  },
+  "bg_psnr_mean": 22.5531,
+  "bg_ssim_mean": 0.8265,
+  "bg_ssim_min": 0.1375,
+  "bg_ssim_median": 0.9114,
+  "bg_ssim_max": 0.9925,
+  "passed": true,
+  "per_sample": [
+    {
+      "imgid": "01848618",
+      "bg_psnr": 29.1206,
+      "bg_ssim": 0.7132
+    },
+    {
+      "imgid": "05258065",
+      "bg_psnr": 32.9331,
+      "bg_ssim": 0.9735
+    },
+    {
+      "imgid": "0_2630",
+      "bg_psnr": 9.7764,
+      "bg_ssim": 0.7715
+    },
+    {
+      "imgid": "0_442",
+      "bg_psnr": 31.7693,
+      "bg_ssim": 0.9808
+    },
+    {
+      "imgid": "0_5340",
+      "bg_psnr": 16.1959,
+      "bg_ssim": 0.9645
+    },
+    {
+      "imgid": "0_6540",
+      "bg_psnr": 31.6126,
+      "bg_ssim": 0.972
+    },
+    {
+      "imgid": "10634874",
+      "bg_psnr": 19.8196,
+      "bg_ssim": 0.6433
+    },
+    {
+      "imgid": "10_3741",
+      "bg_psnr": 22.5141,
+      "bg_ssim": 0.9183
+    },
+    {
+      "imgid": "10_7518",
+      "bg_psnr": 27.0984,
+      "bg_ssim": 0.8962
+    },
+    {
+      "imgid": "11_2582_1",
+      "bg_psnr": 35.6462,
+      "bg_ssim": 0.9794
+    },
+    {
+      "imgid": "12_742",
+      "bg_psnr": 13.5691,
+      "bg_ssim": 0.7708
+    },
+    {
+      "imgid": "12_7747",
+      "bg_psnr": 26.1097,
+      "bg_ssim": 0.9328
+    },
+    {
+      "imgid": "13_2938_1",
+      "bg_psnr": 21.0208,
+      "bg_ssim": 0.9486
+    },
+    {
+      "imgid": "13_3996",
+      "bg_psnr": 10.9512,
+      "bg_ssim": 0.8019
+    },
+    {
+      "imgid": "14_7724",
+      "bg_psnr": 17.2458,
+      "bg_ssim": 0.9225
+    },
+    {
+      "imgid": "15928382",
+      "bg_psnr": 25.945,
+      "bg_ssim": 0.9868
+    },
+    {
+      "imgid": "15_148",
+      "bg_psnr": 20.3736,
+      "bg_ssim": 0.9365
+    },
+    {
+      "imgid": "15_6091_1",
+      "bg_psnr": 17.2258,
+      "bg_ssim": 0.7902
+    },
+    {
+      "imgid": "17768652",
+      "bg_psnr": 25.9401,
+      "bg_ssim": 0.9686
+    },
+    {
+      "imgid": "1_04303679",
+      "bg_psnr": 25.023,
+      "bg_ssim": 0.7801
+    },
+    {
+      "imgid": "2_00620467",
+      "bg_psnr": 26.948,
+      "bg_ssim": 0.8645
+    },
+    {
+      "imgid": "2_01235039",
+      "bg_psnr": 29.1404,
+      "bg_ssim": 0.9706
+    },
+    {
+      "imgid": "2_01951146",
+      "bg_psnr": 12.4408,
+      "bg_ssim": 0.7258
+    },
+    {
+      "imgid": "2_02508527",
+      "bg_psnr": 16.6337,
+      "bg_ssim": 0.1375
+    },
+    {
+      "imgid": "2_04131034",
+      "bg_psnr": 21.0525,
+      "bg_ssim": 0.4414
+    },
+    {
+      "imgid": "2_04881870",
+      "bg_psnr": 20.2685,
+      "bg_ssim": 0.7221
+    },
+    {
+      "imgid": "2_06571547",
+      "bg_psnr": 16.7524,
+      "bg_ssim": 0.9268
+    },
+    {
+      "imgid": "2_06951854",
+      "bg_psnr": 19.4476,
+      "bg_ssim": 0.8357
+    },
+    {
+      "imgid": "2_06978515",
+      "bg_psnr": 25.257,
+      "bg_ssim": 0.9213
+    },
+    {
+      "imgid": "2_09517409",
+      "bg_psnr": 14.3686,
+      "bg_ssim": 0.548
+    },
+    {
+      "imgid": "2_09546710",
+      "bg_psnr": 24.1217,
+      "bg_ssim": 0.9727
+    },
+    {
+      "imgid": "2_11647799",
+      "bg_psnr": 18.1321,
+      "bg_ssim": 0.7097
+    },
+    {
+      "imgid": "2_13667162",
+      "bg_psnr": 22.1834,
+      "bg_ssim": 0.3766
+    },
+    {
+      "imgid": "2_13967516",
+      "bg_psnr": 19.328,
+      "bg_ssim": 0.8627
+    },
+    {
+      "imgid": "2_14777023",
+      "bg_psnr": 21.8614,
+      "bg_ssim": 0.5389
+    },
+    {
+      "imgid": "2_16512672",
+      "bg_psnr": 31.5048,
+      "bg_ssim": 0.975
+    },
+    {
+      "imgid": "2_17661216",
+      "bg_psnr": 32.7792,
+      "bg_ssim": 0.9925
+    },
+    {
+      "imgid": "2_2996_1",
+      "bg_psnr": 10.728,
+      "bg_ssim": 0.5228
+    },
+    {
+      "imgid": "2_6672",
+      "bg_psnr": 16.7925,
+      "bg_ssim": 0.8371
+    },
+    {
+      "imgid": "2_7849",
+      "bg_psnr": 40.0838,
+      "bg_ssim": 0.9925
+    },
+    {
+      "imgid": "3_4479",
+      "bg_psnr": 17.6977,
+      "bg_ssim": 0.7255
+    },
+    {
+      "imgid": "3_6330",
+      "bg_psnr": 19.7802,
+      "bg_ssim": 0.9083
+    },
+    {
+      "imgid": "4_4561",
+      "bg_psnr": 25.394,
+      "bg_ssim": 0.9468
+    },
+    {
+      "imgid": "4_5082",
+      "bg_psnr": 22.4368,
+      "bg_ssim": 0.9252
+    },
+    {
+      "imgid": "4_5764",
+      "bg_psnr": 37.0461,
+      "bg_ssim": 0.9679
+    },
+    {
+      "imgid": "4_6130",
+      "bg_psnr": 14.0999,
+      "bg_ssim": 0.7262
+    },
+    {
+      "imgid": "4_8063",
+      "bg_psnr": 20.1283,
+      "bg_ssim": 0.9146
+    },
+    {
+      "imgid": "5_7390",
+      "bg_psnr": 27.8467,
+      "bg_ssim": 0.9658
+    },
+    {
+      "imgid": "8_5919",
+      "bg_psnr": 25.6732,
+      "bg_ssim": 0.9323
+    },
+    {
+      "imgid": "9_8826",
+      "bg_psnr": 17.8386,
+      "bg_ssim": 0.7868
+    }
+  ]
+}

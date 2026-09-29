@@ -1,25 +1,33 @@
-# ---- downloaded data & weights (never commit) ----
-data/
-models/
-ckpts/
-results_single/
-validate_out/
+# ---------------------------------------------------------------------------
+# Every content rule below is anchored to the repository root on purpose.
+# An unanchored rule such as "models/" also matches
+# diffusers/src/diffusers/models/ (the vendored library's core package) and
+# would silently drop it -- together with the tracked models/*.py source files.
+# Write "/dir/" or "/models/*/" when you mean "only at the top level".
+# ---------------------------------------------------------------------------
+
+# ---- downloaded data & checkpoints (never commit) ----
+/data/
+/models/*/
+/ckpts/
+/results_single/
+/validate_out/
+/wandb/
 
 # ---- training artifacts ----
-# keep the reported training curve: output/stage2_full/loss_log.csv is tracked
-output/*
-!output/stage2_full/
-output/stage2_full/*
-!output/stage2_full/loss_log.csv
-logs/
-wandb/
-*.log
+# the reported training curve stays in the repository: output/stage2_full/loss_log.csv
+/output/*
+!/output/stage2_full/
+/output/stage2_full/*
+!/output/stage2_full/loss_log.csv
+/logs/
 
-# ---- checkpoints / weights ----
+# ---- weights / binary checkpoints anywhere ----
 *.safetensors
 *.pt
 *.pth
 *.ckpt
+*.log
 
 # ---- python ----
 __pycache__/
@@ -36,8 +44,8 @@ dist/
 .vscode/
 
 # ---- keep README assets and benchmark metadata ----
-!assets/**
-!assets/*.png
+!/assets/**
+!/assets/*.png
 
 # ---- never commit push credentials ----
 .push_key*
